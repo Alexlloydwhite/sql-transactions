@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
   });
 })
 
-router.post('/transfer', (req,res) => {
+router.post('/transfer', async (req,res) => {
   const toAccount = req.body.to;
   const fromAccount = req.body.from;
   const amount = req.body.amount;
@@ -33,7 +33,7 @@ router.post('/transfer', (req,res) => {
   console.log(`Info for transfer:`, toAccount, fromAccount, amount);
 
   // MUST use the same connection for all the queries in a Transaction
-  const connection = await pool.connection();
+  const connection = await pool.connect();
 
   try {
     await connection.query('BEGIN;');
@@ -43,6 +43,7 @@ router.post('/transfer', (req,res) => {
     await connection.query(sqlText, [fromAccount, -amount]);
     await connection.query(sqlText, [toAccount, amount]);
     await connection.query(`COMMIT;`);
+    res.send(200);
   } catch (error) {
     await connection.query('ROLLBACK;');
     console.log(`error transferring money!`, error);
