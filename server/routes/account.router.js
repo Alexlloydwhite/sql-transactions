@@ -5,15 +5,16 @@ const pool = require('../modules/pool');
 
 router.get('/', (req, res) => {
 
-  const sqlText = 
-  `SELECT 
+  const sqlText = `
+  SELECT 
     account.id, 
     account.name, 
     SUM(amount) 
   FROM account
   JOIN register 
   ON account.id = register.acct_id 
-  GROUP BY register.acct_id, account.id;`;
+  GROUP BY register.acct_id, account.id;
+  `;
 
   pool.query(sqlText)
     .then(result => {
@@ -37,9 +38,7 @@ router.post('/transfer', async (req,res) => {
 
   try {
     await connection.query('BEGIN;');
-    const sqlText = 
-    `INSERT INTO register (acct_id, amount) 
-    VALUES ($1, $2);`;
+    const sqlText = `INSERT INTO register (acct_id, amount) VALUES ($1, $2);`;
     await connection.query(sqlText, [fromAccount, -amount]);
     await connection.query(sqlText, [toAccount, amount]);
     await connection.query(`COMMIT;`);
